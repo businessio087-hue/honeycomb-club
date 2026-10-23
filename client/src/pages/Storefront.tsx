@@ -28,6 +28,7 @@ const heroImage = "/assets/hero-store.jpeg";
 const foliageImage = "/assets/foliage.jpg";
 const logoUrl = "/assets/logo.png";
 const yocoUrl = "/assets/yoco.png";
+const wellnessImage = "/assets/healthTHS.jpg";
 
 function useStoredAgeGate() {
   const [verified, setVerified] = useState(
@@ -53,6 +54,42 @@ function GlassIconButton({
     <button className="icon-button glass" aria-label={label} onClick={onClick}>
       {children}
     </button>
+  );
+}
+
+function GreetingIntro({ onDone }: { onDone: () => void }) {
+  const [unwinding, setUnwinding] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const reducedTimer = window.setTimeout(onDone, 350);
+      return () => window.clearTimeout(reducedTimer);
+    }
+    const unwindTimer = window.setTimeout(() => setUnwinding(true), 5600);
+    const doneTimer = window.setTimeout(onDone, 7100);
+    return () => {
+      window.clearTimeout(unwindTimer);
+      window.clearTimeout(doneTimer);
+    };
+  }, [onDone]);
+
+  return (
+    <div
+      className={unwinding ? "greeting-overlay unwinding" : "greeting-overlay"}
+      role="status"
+      aria-live="polite"
+      aria-label="Welcome to The Honeycomb Club"
+    >
+      <div className="greeting-glow" />
+      <div className="greeting-center">
+        <img className="greeting-logo" src={logoUrl} alt="The Honeycomb Club" />
+        <div className="greeting-script-wrap" aria-hidden="true">
+          <span className="greeting-script">Welcome</span>
+        </div>
+        <span className="greeting-subline">to the Club</span>
+      </div>
+      <span className="greeting-fineprint">A South African first.</span>
+    </div>
   );
 }
 
@@ -444,9 +481,16 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
             <div className="category-grid">
               {categories.map((category, index) => (
                 <Link
-                  className={`category-card cat-${index + 1}`}
+                  className={`category-card cat-${index + 1}${index === 0 ? " has-image" : ""}`}
                   key={category.name}
                   href={`/shop?category=${category.name}`}
+                  style={
+                    index === 0
+                      ? {
+                          backgroundImage: `linear-gradient(180deg, rgba(14, 26, 20, 0.16), rgba(14, 26, 20, 0.72)), url(${wellnessImage})`,
+                        }
+                      : undefined
+                  }
                 >
                   <div className="category-number">0{index + 1}</div>
                   <div>
@@ -1071,6 +1115,10 @@ function Footer() {
 export default function Storefront() {
   const [location, navigate] = useLocation();
   const [matchProduct, params] = useRoute("/product/:slug");
+  const [greetingDone, setGreetingDone] = useState(() => {
+    if (window.location.pathname !== "/") return true;
+    return window.sessionStorage.getItem("thc-greeting-seen") === "yes";
+  });
   const [drawer, setDrawer] = useState(false);
   const [search, setSearch] = useState(false);
   const [lines, setLines] = useState<CartLine[]>(() => {
@@ -1109,6 +1157,10 @@ export default function Storefront() {
     ? products.find(p => p.slug === params?.slug)
     : undefined;
   const page = location.split("?")[0];
+  const finishGreeting = () => {
+    window.sessionStorage.setItem("thc-greeting-seen", "yes");
+    setGreetingDone(true);
+  };
   const content =
     matchProduct && !activeProduct ? (
       <main className="content-page container account-page">
@@ -1176,6 +1228,9 @@ export default function Storefront() {
     );
   return (
     <div className="site-app">
+      {page === "/" && !greetingDone && (
+        <GreetingIntro onDone={finishGreeting} />
+      )}
       <SiteHeader
         cartCount={lines.reduce((sum, l) => sum + l.quantity, 0)}
         onCart={() => setDrawer(true)}

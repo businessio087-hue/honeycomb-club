@@ -86,6 +86,199 @@ button {
   -webkit-backdrop-filter: blur(24px);
 }
 
+/* Opening greeting */
+.greeting-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--forest-dark);
+  background: var(--off-white);
+  animation: greeting-fade-in 700ms var(--ease-out) both;
+}
+.greeting-overlay::before,
+.greeting-overlay::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+.greeting-overlay::before {
+  width: 72vw;
+  height: 72vw;
+  max-width: 850px;
+  max-height: 850px;
+  background: radial-gradient(
+    circle,
+    rgba(221, 232, 220, 0.9),
+    rgba(221, 232, 220, 0) 68%
+  );
+}
+.greeting-overlay::after {
+  width: 42vw;
+  height: 42vw;
+  max-width: 500px;
+  max-height: 500px;
+  background: radial-gradient(
+    circle,
+    rgba(185, 139, 90, 0.12),
+    rgba(185, 139, 90, 0) 68%
+  );
+  transform: translate(26vw, -18vh);
+}
+.greeting-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.72;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.5),
+    transparent 38%,
+    rgba(31, 61, 43, 0.04)
+  );
+}
+.greeting-center {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  transform: translateY(-2vh);
+}
+.greeting-logo {
+  width: clamp(130px, 18vw, 220px);
+  height: auto;
+  opacity: 0;
+  filter: sepia(0.12) saturate(0.82);
+  animation: greeting-logo-in 1200ms var(--ease-out) 180ms forwards;
+}
+.greeting-script-wrap {
+  position: relative;
+  margin-top: 30px;
+  overflow: hidden;
+  line-height: 1;
+}
+.greeting-script-wrap::after {
+  content: "";
+  position: absolute;
+  top: 14%;
+  right: 0;
+  width: 2px;
+  height: 78%;
+  border-radius: 50%;
+  background: var(--oak);
+  opacity: 0;
+  animation: greeting-cursor 5000ms linear 900ms forwards;
+}
+.greeting-script {
+  display: block;
+  color: var(--forest);
+  font-family: "Snell Roundhand", "Segoe Script", "Bradley Hand", cursive;
+  font-size: clamp(64px, 11vw, 140px);
+  font-weight: 500;
+  letter-spacing: 0.015em;
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0);
+  animation: greeting-write 5000ms var(--ease-in-out) 900ms forwards;
+}
+.greeting-subline {
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: greeting-subline-in 900ms var(--ease-out) 3800ms forwards;
+}
+.greeting-fineprint {
+  position: absolute;
+  bottom: 34px;
+  color: var(--olive);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: greeting-subline-in 800ms var(--ease-out) 4300ms forwards;
+}
+.greeting-overlay.unwinding .greeting-logo {
+  animation: greeting-logo-out 1400ms var(--ease-in-out) forwards;
+}
+.greeting-overlay.unwinding .greeting-script {
+  animation: greeting-unwind 1400ms var(--ease-in-out) forwards;
+}
+.greeting-overlay.unwinding .greeting-script-wrap::after,
+.greeting-overlay.unwinding .greeting-subline,
+.greeting-overlay.unwinding .greeting-fineprint {
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+@keyframes greeting-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes greeting-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.72) rotate(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes greeting-logo-out {
+  from {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.82) rotate(4deg);
+  }
+}
+@keyframes greeting-write {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes greeting-unwind {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+@keyframes greeting-cursor {
+  0%,
+  92% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes greeting-subline-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Header */
 .site-header {
   position: absolute;
@@ -445,6 +638,15 @@ h2 {
 }
 .cat-1 {
   background: #f7f6ef;
+}
+.category-card.has-image {
+  color: white;
+  background-size: cover;
+  background-position: center 38%;
+  background-repeat: no-repeat;
+}
+.category-card.has-image .eyebrow {
+  color: white;
 }
 .cat-2 {
   background: #c9d6c4;
@@ -1437,6 +1639,22 @@ h2 {
   }
   .hero-foliage {
     animation: none;
+  }
+  .greeting-overlay,
+  .greeting-logo,
+  .greeting-script,
+  .greeting-script-wrap::after,
+  .greeting-subline,
+  .greeting-fineprint {
+    animation: none !important;
+  }
+  .greeting-logo,
+  .greeting-subline,
+  .greeting-fineprint {
+    opacity: 1;
+  }
+  .greeting-script {
+    clip-path: none;
   }
   .category-card:hover,
   .product-card:hover .product-image,

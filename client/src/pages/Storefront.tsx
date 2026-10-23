@@ -1,0 +1,1201 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useRoute } from "wouter";
+import {
+  ArrowRight,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Instagram,
+  MapPin,
+  Menu,
+  Search,
+  ShoppingBag,
+  Sparkles,
+  UserRound,
+  X,
+} from "lucide-react";
+import {
+  categories,
+  money,
+  products,
+  type Category,
+  type Product,
+} from "@/data/products";
+
+type CartLine = { product: Product; quantity: number };
+
+const heroImage = "/assets/hero-store.jpeg";
+const foliageImage = "/assets/foliage.jpg";
+const logoUrl = "/assets/logo.png";
+const yocoUrl = "/assets/yoco.png";
+
+function useStoredAgeGate() {
+  const [verified, setVerified] = useState(
+    () => window.localStorage.getItem("thc-age-verified") === "yes"
+  );
+  const confirm = () => {
+    window.localStorage.setItem("thc-age-verified", "yes");
+    setVerified(true);
+  };
+  return { verified, confirm };
+}
+
+function GlassIconButton({
+  label,
+  children,
+  onClick,
+}: {
+  label: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <button className="icon-button glass" aria-label={label} onClick={onClick}>
+      {children}
+    </button>
+  );
+}
+
+function SiteHeader({
+  cartCount,
+  onCart,
+  onSearch,
+}: {
+  cartCount: number;
+  onCart: () => void;
+  onSearch: () => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
+  return (
+    <header className="site-header">
+      <div className="top-note">
+        <span>18+ adult-only retail</span>
+        <span className="dot" />
+        <span>CBD · non-psychoactive · under 0.001% THC</span>
+      </div>
+      <div className="nav-shell glass">
+        <Link href="/" className="brand-lockup">
+          <img src={logoUrl} alt="The Honeycomb Club" />
+        </Link>
+        <nav className={menuOpen ? "primary-nav open" : "primary-nav"}>
+          <Link href="/" onClick={() => setMenuOpen(false)}>
+            Home
+          </Link>
+          <div className="nav-dropdown">
+            <button onClick={() => setShopOpen(v => !v)} className="nav-link">
+              Shop <ChevronDown size={14} />
+            </button>
+            {shopOpen && (
+              <div className="dropdown-menu glass">
+                <Link href="/shop" onClick={() => setMenuOpen(false)}>
+                  All Products
+                </Link>
+                {categories.map(c => (
+                  <Link
+                    key={c.name}
+                    href={`/shop?category=${c.name}`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+          <Link href="/about" onClick={() => setMenuOpen(false)}>
+            About
+          </Link>
+          <Link href="/contact" onClick={() => setMenuOpen(false)}>
+            Contact
+          </Link>
+        </nav>
+        <div className="header-actions">
+          <GlassIconButton label="Search" onClick={onSearch}>
+            <Search size={18} strokeWidth={1.6} />
+          </GlassIconButton>
+          <Link href="/account" className="desktop-only">
+            <GlassIconButton label="Account">
+              <UserRound size={18} strokeWidth={1.6} />
+            </GlassIconButton>
+          </Link>
+          <button className="cart-pill" onClick={onCart}>
+            <ShoppingBag size={17} strokeWidth={1.7} />
+            <span>{cartCount}</span>
+          </button>
+          <button
+            className="mobile-menu"
+            aria-label="Menu"
+            onClick={() => setMenuOpen(v => !v)}
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function AgeGate({ onConfirm }: { onConfirm: () => void }) {
+  return (
+    <div className="age-overlay">
+      <div className="age-backdrop" />
+      <div
+        className="age-card glass"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="age-gate-title"
+      >
+        <div className="age-mark">THC</div>
+        <p className="eyebrow">The Honeycomb Club</p>
+        <h1 id="age-gate-title">Before you enter, take a breath.</h1>
+        <p>
+          This is an adult-only cannabis retail experience. Our products are
+          CBD-focused, non-psychoactive, and contain less than 0.001% THC.
+        </p>
+        <button className="button button-dark" onClick={onConfirm}>
+          I am 18 or older <ArrowRight size={16} />
+        </button>
+        <span className="age-fineprint">
+          By entering, you confirm that you are of legal age in your country.
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function SearchModal({ onClose }: { onClose: () => void }) {
+  const [, navigate] = useLocation();
+  const [query, setQuery] = useState("");
+  const results = useMemo(
+    () =>
+      query.trim()
+        ? products
+            .filter(p => p.name.toLowerCase().includes(query.toLowerCase()))
+            .slice(0, 5)
+        : products.slice(0, 4),
+    [query]
+  );
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="search-modal glass"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="search-title"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="modal-top">
+          <span className="eyebrow" id="search-title">
+            Search the Club
+          </span>
+          <button className="plain-button" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+        <div className="search-input-wrap">
+          <Search size={20} />
+          <input
+            autoFocus
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Try CBD oil, gummies, pre-rolls…"
+          />
+        </div>
+        <div className="search-results">
+          {results.map(p => (
+            <button
+              key={p.slug}
+              className="search-result"
+              onClick={() => {
+                navigate(`/product/${p.slug}`);
+                onClose();
+              }}
+            >
+              <img src={p.image} alt="" />
+              <span>
+                <strong>{p.name}</strong>
+                <small>
+                  {p.category} · {money(p.price)}
+                </small>
+              </span>
+              <ArrowRight size={17} />
+            </button>
+          ))}
+          {query && !results.length && (
+            <p className="muted">No products found. Try a broader search.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CartDrawer({
+  lines,
+  onClose,
+  onChange,
+  onCheckout,
+}: {
+  lines: CartLine[];
+  onClose: () => void;
+  onChange: (slug: string, delta: number) => void;
+  onCheckout: () => void;
+}) {
+  const total = lines.reduce(
+    (sum, line) => sum + line.product.price * line.quantity,
+    0
+  );
+  return (
+    <div className="drawer-overlay" onClick={onClose}>
+      <aside
+        className="cart-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cart-title"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="drawer-head">
+          <div>
+            <span className="eyebrow">Your selection</span>
+            <h2 id="cart-title">
+              Cart <span>({lines.length})</span>
+            </h2>
+          </div>
+          <button className="plain-button" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+        {lines.length === 0 ? (
+          <div className="empty-cart">
+            <ShoppingBag size={32} strokeWidth={1.2} />
+            <p>Your cart is waiting for something considered.</p>
+            <Link
+              className="button button-outline"
+              href="/shop"
+              onClick={onClose}
+            >
+              Browse the shop
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="cart-lines">
+              {lines.map(line => (
+                <div className="cart-line" key={line.product.slug}>
+                  <img src={line.product.image} alt="" />
+                  <div className="line-copy">
+                    <strong>{line.product.name}</strong>
+                    <span>{money(line.product.price)}</span>
+                    <div className="qty">
+                      <button onClick={() => onChange(line.product.slug, -1)}>
+                        −
+                      </button>
+                      <span>{line.quantity}</span>
+                      <button onClick={() => onChange(line.product.slug, 1)}>
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="drawer-total">
+              <span>Subtotal</span>
+              <strong>{money(total)}</strong>
+            </div>
+            <p className="compliance-note">
+              CBD · non-psychoactive · less than 0.001% THC · SAHPRA approved.
+            </p>
+            <button className="button button-dark full" onClick={onCheckout}>
+              Checkout <ArrowRight size={16} />
+            </button>
+          </>
+        )}
+      </aside>
+    </div>
+  );
+}
+
+function ProductCard({
+  product,
+  onAdd,
+}: {
+  product: Product;
+  onAdd: (p: Product) => void;
+}) {
+  return (
+    <article className="product-card reveal">
+      <Link
+        href={`/product/${product.slug}`}
+        className="product-image"
+        style={{ background: product.accent }}
+      >
+        <img src={product.image} alt={product.name} />
+        <span className="product-badge">{product.category}</span>
+      </Link>
+      <div className="product-info">
+        <div>
+          <Link href={`/product/${product.slug}`}>
+            <h3>{product.name}</h3>
+          </Link>
+          <p>{money(product.price)}</p>
+        </div>
+        <button
+          className="round-add"
+          aria-label={`Add ${product.name} to cart`}
+          onClick={() => onAdd(product)}
+        >
+          +
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function ComplianceBand() {
+  return (
+    <section className="compliance-band">
+      <div className="container compliance-inner">
+        <Sparkles size={19} />
+        <p>
+          <strong>CBD without the noise.</strong> All products contain less than
+          0.001% THC and are SAHPRA approved.
+        </p>
+        <span>South African first</span>
+      </div>
+    </section>
+  );
+}
+
+function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
+  const featured = products.slice(5, 9);
+  return (
+    <>
+      <main>
+        <section className="hero-section">
+          <div
+            className="hero-foliage"
+            style={{ backgroundImage: `url(${foliageImage})` }}
+          />
+          <div className="hero-glass-panel glass">
+            <div className="eyebrow">A South African 1st</div>
+            <h1>
+              The Honeycomb
+              <br />
+              <em>Club</em>
+            </h1>
+            <p>
+              Welcome to The Honeycomb Club (THC) – A premium cannabis
+              experience.
+            </p>
+            <Link className="button button-light" href="/shop">
+              Shop Now <ArrowRight size={16} />
+            </Link>
+            <div className="hero-meta">
+              <span>High-CBD / low-THC</span>
+              <span>Menlyn Park · Pretoria</span>
+            </div>
+          </div>
+          <div className="hero-caption">
+            Botanical retail
+            <br />
+            for grown-up rituals
+          </div>
+        </section>
+        <section className="intro-section container">
+          <div className="section-kicker">01 / The Club</div>
+          <div className="intro-grid">
+            <h2>
+              A calmer way
+              <br />
+              to <em>browse.</em>
+            </h2>
+            <div>
+              <p className="lede">
+                The Honeycomb Club sells cannabis (CBD – non psychoactive) to
+                users in the South African market. We are here to make the best
+                cannabis products available in a safe, legal and comfortable
+                environment.
+              </p>
+              <p>
+                Adult-only retail, state-of-the-art technology, forward-looking
+                green practices, and a deep respect for security and safety.
+              </p>
+              <Link className="text-link" href="/about">
+                Meet the Club <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        </section>
+        <section className="category-section">
+          <div className="container">
+            <div className="section-heading">
+              <div>
+                <div className="section-kicker">02 / Explore</div>
+                <h2>
+                  Made for the
+                  <br />
+                  <em>everyday.</em>
+                </h2>
+              </div>
+              <p>Four considered ways into the collection.</p>
+            </div>
+            <div className="category-grid">
+              {categories.map((category, index) => (
+                <Link
+                  className={`category-card cat-${index + 1}`}
+                  key={category.name}
+                  href={`/shop?category=${category.name}`}
+                >
+                  <div className="category-number">0{index + 1}</div>
+                  <div>
+                    <span className="eyebrow">{category.eyebrow}</span>
+                    <h3>{category.name}</h3>
+                    <p>{category.copy}</p>
+                  </div>
+                  <ArrowRight size={18} />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="feature-strip">
+          <div
+            className="strip-image"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          />
+          <div className="strip-glass glass">
+            <span className="eyebrow">A considered collection</span>
+            <h2>
+              Soft light.
+              <br />
+              <em>Strong point of view.</em>
+            </h2>
+            <p>
+              Discover wellness, cosmetics, smokeables and edibles from the
+              original South African CBD club.
+            </p>
+            <Link className="button button-dark" href="/shop">
+              Browse all products <ArrowRight size={16} />
+            </Link>
+          </div>
+        </section>
+        <section className="featured-section container">
+          <div className="section-heading">
+            <div>
+              <div className="section-kicker">03 / Selected</div>
+              <h2>
+                Trending
+                <br />
+                <em>at the Club.</em>
+              </h2>
+            </div>
+            <Link className="text-link" href="/shop">
+              Browse all <ArrowRight size={16} />
+            </Link>
+          </div>
+          <div className="product-grid featured-grid">
+            {featured.map(product => (
+              <ProductCard key={product.slug} product={product} onAdd={onAdd} />
+            ))}
+          </div>
+        </section>
+        <section className="about-teaser">
+          <div className="container about-teaser-inner">
+            <div className="glass about-card">
+              <div className="section-kicker">04 / About us</div>
+              <h2>
+                Cannabis, with a little more <em>care.</em>
+              </h2>
+              <p>
+                We believe in making cannabis available to the communities we
+                serve in a safe and legal manner. High-CBD, low-THC means our
+                collection is bred, grown, and presented with intention.
+              </p>
+              <Link className="button button-light" href="/about">
+                Read our story <ArrowRight size={16} />
+              </Link>
+            </div>
+            <div
+              className="about-photo"
+              style={{ backgroundImage: `url(${heroImage})` }}
+            >
+              <span>
+                Over 7 years
+                <br />
+                of growing
+              </span>
+            </div>
+          </div>
+        </section>
+        <section className="visit-section container">
+          <div className="visit-copy">
+            <div className="section-kicker">05 / Visit us</div>
+            <h2>
+              Come by for a<br />
+              <em>closer look.</em>
+            </h2>
+            <p>
+              Shop LF33, Menlyn Park Shopping Centre
+              <br />
+              Atterbury Road & Lois Ave
+              <br />
+              Menlyn, Pretoria, 0063
+            </p>
+            <Link className="text-link" href="/contact">
+              Plan your visit <ArrowRight size={16} />
+            </Link>
+          </div>
+          <div className="visit-details glass">
+            <div>
+              <span className="eyebrow">Open hours</span>
+              <p>
+                Mon–Thu 9am–8pm
+                <br />
+                Fri & Sat 9am–9pm
+                <br />
+                Sunday 9am–6pm
+              </p>
+            </div>
+            <div>
+              <span className="eyebrow">WhatsApp</span>
+              <a href="https://wa.me/+27673418785">+27 67 341 8785</a>
+            </div>
+            <div className="map-art">
+              <MapPin size={18} />
+              <span>
+                Menlyn Park
+                <br />
+                Pretoria
+              </span>
+            </div>
+          </div>
+        </section>
+      </main>
+      <ComplianceBand />
+    </>
+  );
+}
+
+function ShopPage({ onAdd }: { onAdd: (p: Product) => void }) {
+  const search = new URLSearchParams(window.location.search);
+  const initial = (search.get("category") as Category | null) || "All";
+  const [category, setCategory] = useState<Category | "All">(initial);
+  const [query, setQuery] = useState("");
+  const shown = products.filter(
+    p =>
+      (category === "All" || p.category === category) &&
+      p.name.toLowerCase().includes(query.toLowerCase())
+  );
+  return (
+    <main className="shop-page container">
+      <div className="shop-intro">
+        <div>
+          <div className="section-kicker">The collection</div>
+          <h1>
+            Our <em>shop.</em>
+          </h1>
+        </div>
+        <p>
+          Premium CBD products, grown and selected with care.
+          <br />
+          Less than 0.001% THC. SAHPRA approved.
+        </p>
+      </div>
+      <div className="shop-tools">
+        <div className="filter-pills">
+          <button
+            className={category === "All" ? "active" : ""}
+            onClick={() => setCategory("All")}
+          >
+            All products
+          </button>
+          {categories.map(c => (
+            <button
+              key={c.name}
+              className={category === c.name ? "active" : ""}
+              onClick={() => setCategory(c.name)}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+        <label className="shop-search">
+          <Search size={16} />
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search shop"
+          />
+        </label>
+      </div>
+      <div className="shop-count">
+        <span>{shown.length} products</span>
+        <span>Adult-only collection</span>
+      </div>
+      <div className="product-grid shop-grid">
+        {shown.map(product => (
+          <ProductCard key={product.slug} product={product} onAdd={onAdd} />
+        ))}
+      </div>
+    </main>
+  );
+}
+
+function ProductPage({
+  product,
+  onAdd,
+}: {
+  product: Product;
+  onAdd: (p: Product) => void;
+}) {
+  return (
+    <main className="product-page container">
+      <Link className="back-link" href="/shop">
+        <ChevronLeft size={16} /> Back to shop
+      </Link>
+      <div className="product-detail">
+        <div
+          className="product-detail-image"
+          style={{ background: product.accent }}
+        >
+          <img src={product.image} alt={product.name} />
+        </div>
+        <div className="product-detail-copy">
+          <span className="eyebrow">{product.category}</span>
+          <h1>{product.name}</h1>
+          <div className="detail-price">{money(product.price)}</div>
+          <div className="detail-rule" />
+          <p className="lede">
+            A considered selection from The Honeycomb Club’s South African CBD
+            collection.
+          </p>
+          <div className="detail-notes">
+            <span>CBD focused</span>
+            <span>Under 0.001% THC</span>
+            <span>SAHPRA approved</span>
+          </div>
+          <button className="button button-dark" onClick={() => onAdd(product)}>
+            Add to cart <ShoppingBag size={16} />
+          </button>
+          <p className="detail-fineprint">
+            For adult customers only. Please use products responsibly and
+            according to the packaging directions.
+          </p>
+        </div>
+      </div>
+      <ComplianceBand />
+    </main>
+  );
+}
+
+function AboutPage() {
+  return (
+    <main className="content-page container">
+      <div className="content-hero">
+        <div className="section-kicker">The Club</div>
+        <h1>
+          A little more
+          <br />
+          <em>care.</em>
+        </h1>
+        <p className="lede">
+          The Honeycomb Club (THC) is, at our core, a cannabis club committed to
+          making cannabis available to the communities we serve in a safe and
+          legal manner.
+        </p>
+      </div>
+      <div className="content-split">
+        <div
+          className="content-image"
+          style={{ backgroundImage: `url(${foliageImage})` }}
+        />
+        <div className="content-copy">
+          <p>
+            We intend to make cannabis available to the communities that we
+            serve in a safe and legal manner. We will always remain respectful
+            and vigilant with regards to the country’s laws during this
+            evolution towards legalisation.
+          </p>
+          <p>
+            We believe in a careful, legal approach to the cannabis plant. As
+            such, we have embarked on our mission — to make available the best
+            quality cannabis products.
+          </p>
+          <p>
+            We have been breeding and growing high CBD cannabis for over 7
+            years, and are excited to offer these products to people all over
+            the world.
+          </p>
+          <div className="quote">
+            “The best cannabis products, in a safe, legal and comfortable
+            environment.”
+          </div>
+        </div>
+      </div>
+      <ComplianceBand />
+    </main>
+  );
+}
+
+function ContactPage() {
+  return (
+    <main className="content-page container">
+      <div className="content-hero">
+        <div className="section-kicker">Find us</div>
+        <h1>
+          Come by
+          <br />
+          <em>the Club.</em>
+        </h1>
+        <p className="lede">
+          We’re in Menlyn Park, Pretoria. Say hello in person or reach out on
+          WhatsApp.
+        </p>
+      </div>
+      <div className="contact-grid">
+        <div className="contact-card glass">
+          <MapPin size={24} />
+          <span className="eyebrow">Address</span>
+          <p>
+            Shop LF33, Menlyn Park Shopping Centre
+            <br />
+            Atterbury Road & Lois Ave
+            <br />
+            Menlyn, Pretoria, 0063
+          </p>
+          <a
+            className="text-link"
+            href="https://maps.google.com/?q=Menlyn+Park+Shopping+Centre"
+          >
+            Open in Maps <ArrowRight size={16} />
+          </a>
+        </div>
+        <div className="contact-card glass">
+          <Sparkles size={24} />
+          <span className="eyebrow">Open hours</span>
+          <p>
+            Mon–Thu 9am–8pm
+            <br />
+            Fri & Sat 9am–9pm
+            <br />
+            Sunday 9am–6pm
+          </p>
+          <a className="text-link" href="https://wa.me/+27673418785">
+            WhatsApp the Club <ArrowRight size={16} />
+          </a>
+        </div>
+        <form
+          className="contact-form glass"
+          onSubmit={e => {
+            e.preventDefault();
+            alert("Thanks — the Club will be in touch.");
+          }}
+        >
+          <span className="eyebrow">Send a note</span>
+          <h2>Let’s talk.</h2>
+          <input placeholder="Your name" required />
+          <input type="email" placeholder="Email address" required />
+          <textarea placeholder="How can we help?" rows={4} required />
+          <button className="button button-dark" type="submit">
+            Send message <ArrowRight size={16} />
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}
+
+function TermsPage() {
+  return (
+    <main className="content-page container">
+      <div className="content-hero">
+        <div className="section-kicker">Good to know</div>
+        <h1>
+          Terms &<br />
+          <em>conditions.</em>
+        </h1>
+        <p className="lede">
+          Please read these terms before using the website or purchasing from
+          The Honeycomb Club.
+        </p>
+      </div>
+      <div className="terms-card glass">
+        <h2>Adult-only retail</h2>
+        <p>
+          All products sold by The Honeycomb Club are intended for adults only.
+          By using this site, you confirm that you are of legal age in your
+          country.
+        </p>
+        <h2>Product information</h2>
+        <p>
+          All our products contain less than 0.001% THC. Products are SAHPRA
+          approved. Product packaging and directions should be followed
+          carefully.
+        </p>
+        <h2>Responsible use</h2>
+        <p>
+          The Honeycomb Club respects South African law and does not make
+          medical promises or health claims. Please use products responsibly and
+          keep them away from children.
+        </p>
+        <h2>Retail details</h2>
+        <p>
+          Shop LF33, Menlyn Park Shopping Centre, Atterbury Road & Lois Ave,
+          Menlyn, Pretoria, 0063.
+        </p>
+      </div>
+    </main>
+  );
+}
+
+function CartPage({
+  lines,
+  onChange,
+  onCheckout,
+}: {
+  lines: CartLine[];
+  onChange: (slug: string, delta: number) => void;
+  onCheckout: () => void;
+}) {
+  const total = lines.reduce(
+    (sum, line) => sum + line.product.price * line.quantity,
+    0
+  );
+  return (
+    <main className="content-page container">
+      <div className="content-hero">
+        <div className="section-kicker">Your selection</div>
+        <h1>
+          Cart <em>notes.</em>
+        </h1>
+        <p className="lede">
+          Keep your considered picks together, then continue to Yoco checkout.
+        </p>
+      </div>
+      {lines.length === 0 ? (
+        <div className="terms-card glass empty-cart-page">
+          <ShoppingBag size={30} strokeWidth={1.2} />
+          <h2>Your cart is waiting.</h2>
+          <p>Browse the collection and return here when you are ready.</p>
+          <Link className="button button-dark" href="/shop">
+            Browse the shop <ArrowRight size={16} />
+          </Link>
+        </div>
+      ) : (
+        <div className="cart-page-list terms-card glass">
+          {lines.map(line => (
+            <div className="cart-line" key={line.product.slug}>
+              <img src={line.product.image} alt="" />
+              <div className="line-copy">
+                <strong>{line.product.name}</strong>
+                <span>{money(line.product.price)}</span>
+                <div className="qty">
+                  <button
+                    aria-label={`Decrease ${line.product.name} quantity`}
+                    onClick={() => onChange(line.product.slug, -1)}
+                  >
+                    −
+                  </button>
+                  <span>{line.quantity}</span>
+                  <button
+                    aria-label={`Increase ${line.product.name} quantity`}
+                    onClick={() => onChange(line.product.slug, 1)}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <strong>{money(line.product.price * line.quantity)}</strong>
+            </div>
+          ))}
+          <div className="summary-total">
+            <span>Total</span>
+            <strong>{money(total)}</strong>
+          </div>
+          <button className="button button-dark full" onClick={onCheckout}>
+            Continue to checkout <ArrowRight size={16} />
+          </button>
+        </div>
+      )}
+    </main>
+  );
+}
+
+function CheckoutPage({
+  lines,
+  onBack,
+}: {
+  lines: CartLine[];
+  onBack: () => void;
+}) {
+  const total = lines.reduce(
+    (sum, line) => sum + line.product.price * line.quantity,
+    0
+  );
+  return (
+    <main className="checkout-page container">
+      <button className="back-link" onClick={onBack}>
+        <ChevronLeft size={16} /> Back to cart
+      </button>
+      <div className="checkout-layout">
+        <div className="checkout-form">
+          <div className="section-kicker">Checkout</div>
+          <h1>
+            Almost <em>there.</em>
+          </h1>
+          <p className="muted">
+            Complete your details and the Club will prepare your order.
+          </p>
+          <div className="form-grid">
+            <label>
+              <span className="sr-only">First name</span>
+              <input placeholder="First name" autoComplete="given-name" />
+            </label>
+            <label>
+              <span className="sr-only">Last name</span>
+              <input placeholder="Last name" autoComplete="family-name" />
+            </label>
+            <label className="full-span">
+              <span className="sr-only">Email address</span>
+              <input
+                className="full-span"
+                placeholder="Email address"
+                type="email"
+                autoComplete="email"
+              />
+            </label>
+            <label className="full-span">
+              <span className="sr-only">Delivery or collection address</span>
+              <input
+                className="full-span"
+                placeholder="Delivery or collection address"
+                autoComplete="street-address"
+              />
+            </label>
+          </div>
+          <div className="payment-choice">
+            <span className="eyebrow">Payment</span>
+            <div className="payment-card">
+              <img src={yocoUrl} alt="Yoco" />
+              <span>Secure checkout with Yoco</span>
+              <span className="payment-dot" />
+            </div>
+          </div>
+          <button
+            className="button button-dark full"
+            onClick={() => alert("Checkout is ready for Yoco payment handoff.")}
+          >
+            Place order · {money(total)} <ArrowRight size={16} />
+          </button>
+          <p className="detail-fineprint">
+            This preview includes the full checkout experience. Connect your
+            Yoco account to process live payments.
+          </p>
+        </div>
+        <aside className="checkout-summary glass">
+          <span className="eyebrow">Your order</span>
+          {lines.map(line => (
+            <div className="summary-line" key={line.product.slug}>
+              <span>
+                {line.product.name} × {line.quantity}
+              </span>
+              <strong>{money(line.product.price * line.quantity)}</strong>
+            </div>
+          ))}
+          <div className="summary-total">
+            <span>Total</span>
+            <strong>{money(total)}</strong>
+          </div>
+          <p className="compliance-note">
+            18+ · CBD-focused · under 0.001% THC
+          </p>
+        </aside>
+      </div>
+    </main>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="site-footer">
+      <div className="container footer-grid">
+        <div>
+          <img src={logoUrl} alt="The Honeycomb Club" className="footer-logo" />
+          <p className="footer-note">
+            A South African first.
+            <br />A premium cannabis experience.
+          </p>
+        </div>
+        <div>
+          <span className="eyebrow">Visit us</span>
+          <p>
+            Shop LF33, Menlyn Park Shopping Centre
+            <br />
+            Pretoria, 0063
+          </p>
+        </div>
+        <div>
+          <span className="eyebrow">Open hours</span>
+          <p>
+            Mon–Thu 9am–8pm
+            <br />
+            Fri & Sat 9am–9pm
+            <br />
+            Sunday 9am–6pm
+          </p>
+        </div>
+        <div>
+          <span className="eyebrow">Follow</span>
+          <div className="socials">
+            <a href="https://www.instagram.com/thehoneycombclubza/">
+              <Instagram size={17} />
+            </a>
+            <a href="https://wa.me/+27673418785">WA</a>
+            <a href="http://fb.com/theHoneycombClubZA">FB</a>
+          </div>
+        </div>
+      </div>
+      <div className="container footer-bottom">
+        <span>© The Honeycomb Club</span>
+        <div>
+          <Link href="/terms">Terms & Conditions</Link>
+          <span>CBD · non-psychoactive · under 0.001% THC</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export default function Storefront() {
+  const [location, navigate] = useLocation();
+  const [matchProduct, params] = useRoute("/product/:slug");
+  const [drawer, setDrawer] = useState(false);
+  const [search, setSearch] = useState(false);
+  const [lines, setLines] = useState<CartLine[]>(() => {
+    try {
+      return JSON.parse(window.localStorage.getItem("thc-cart") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const age = useStoredAgeGate();
+  useEffect(() => {
+    window.localStorage.setItem("thc-cart", JSON.stringify(lines));
+  }, [lines]);
+  const add = (product: Product) =>
+    setLines(current => {
+      const found = current.find(l => l.product.slug === product.slug);
+      return found
+        ? current.map(l =>
+            l.product.slug === product.slug
+              ? { ...l, quantity: l.quantity + 1 }
+              : l
+          )
+        : [...current, { product, quantity: 1 }];
+    });
+  const change = (slug: string, delta: number) =>
+    setLines(current =>
+      current.flatMap(l =>
+        l.product.slug === slug
+          ? l.quantity + delta > 0
+            ? [{ ...l, quantity: l.quantity + delta }]
+            : []
+          : [l]
+      )
+    );
+  const activeProduct = matchProduct
+    ? products.find(p => p.slug === params?.slug)
+    : undefined;
+  const page = location.split("?")[0];
+  const content =
+    matchProduct && !activeProduct ? (
+      <main className="content-page container account-page">
+        <div className="content-hero">
+          <div className="section-kicker">The Club</div>
+          <h1>
+            Product not
+            <br />
+            <em>found.</em>
+          </h1>
+          <p className="lede">
+            That product is not in the current collection. Browse the full shop
+            to find another considered pick.
+          </p>
+          <Link className="button button-dark" href="/shop">
+            Browse the shop <ArrowRight size={16} />
+          </Link>
+        </div>
+      </main>
+    ) : activeProduct ? (
+      <ProductPage product={activeProduct} onAdd={add} />
+    ) : page === "/shop" ? (
+      <ShopPage onAdd={add} />
+    ) : page === "/about" ? (
+      <AboutPage />
+    ) : page === "/contact" ? (
+      <ContactPage />
+    ) : page === "/terms" ? (
+      <TermsPage />
+    ) : page === "/cart" ? (
+      <CartPage
+        lines={lines}
+        onChange={change}
+        onCheckout={() => navigate("/checkout")}
+      />
+    ) : page === "/checkout" ? (
+      lines.length ? (
+        <CheckoutPage lines={lines} onBack={() => setDrawer(true)} />
+      ) : (
+        <CartPage
+          lines={lines}
+          onChange={change}
+          onCheckout={() => navigate("/shop")}
+        />
+      )
+    ) : page === "/account" ? (
+      <main className="content-page container account-page">
+        <div className="content-hero">
+          <div className="section-kicker">Your Club account</div>
+          <h1>
+            Keep it
+            <br />
+            <em>personal.</em>
+          </h1>
+          <p className="lede">
+            Sign in to view your orders and keep your favourites close.
+          </p>
+          <a className="button button-dark" href="/api/oauth/login">
+            Continue to account <ArrowRight size={16} />
+          </a>
+        </div>
+      </main>
+    ) : (
+      <HomePage onAdd={add} />
+    );
+  return (
+    <div className="site-app">
+      <SiteHeader
+        cartCount={lines.reduce((sum, l) => sum + l.quantity, 0)}
+        onCart={() => setDrawer(true)}
+        onSearch={() => setSearch(true)}
+      />
+      {content}
+      <Footer />
+      {drawer && (
+        <CartDrawer
+          lines={lines}
+          onClose={() => setDrawer(false)}
+          onChange={change}
+          onCheckout={() => {
+            setDrawer(false);
+            navigate("/checkout");
+          }}
+        />
+      )}
+      {search && <SearchModal onClose={() => setSearch(false)} />}
+      {!age.verified && <AgeGate onConfirm={age.confirm} />}
+    </div>
+  );
+}

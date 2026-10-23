@@ -1,0 +1,9 @@
+# Honeycomb Club delivery outcomes
+
+- [x] **Brand and visual system** — Use the existing Honeycomb Club logo and favicon exactly as supplied; apply the supplied Honeycombcollage.pdf direction with frosted/smoked glass over blurred foliage, warm timber retail cues, Avenir-first typography, the specified green/sage/oak/cream palette, rounded cards, thin dividers, soft shadows, and accessible contrast.
+- [x] **Home page** — Include “A South African 1st”, “The Honeycomb Club”, “Welcome to The Honeycomb Club (THC) – A premium cannabis experience.”, Shop Now, intro copy from the live site, four category cards for Wellness/Cosmetics/Smokeables/Edibles, real featured products, About Us teaser, compliance statement, and Visit Us block.
+- [x] **Catalog and commerce** — Include every product from the live shop with its live name, price, category, and product image; support category filters, search, product detail pages, add-to-cart, quantity updates, cart totals, checkout UI, and the Yoco badge.
+- [x] **Content pages** — Provide About, Contact, Terms & Conditions, and Account entry points with live-site address, hours, WhatsApp, social links, and respectful South African legal language.
+- [x] **Trust and compliance** — Show adult-only 18+ gating on first visit; clearly state CBD is non-psychoactive, products contain less than 0.001% THC, and are SAHPRA approved; avoid health claims and medical promises.
+- [x] **Responsive interaction** — Support mobile navigation, cart drawer, search modal, product detail modal/page, purposeful motion, reduced-motion support, accessible dialog semantics, and a layered glass divider / slow botanical drift.
+- [x] **Managed project readiness** — Serve the route manifest, keep the preview port healthy, run type and production checks, preserve the supplied moodboard at `client/public/reference/Honeycombcollage.pdf`, and save the completed project as a checkpoint.

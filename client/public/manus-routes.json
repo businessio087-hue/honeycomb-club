@@ -1,0 +1,13 @@
+{
+  "routes": [
+    { "path": "/", "title": "The Honeycomb Club" },
+    { "path": "/shop", "title": "Shop" },
+    { "path": "/about", "title": "About Us" },
+    { "path": "/contact", "title": "Contact" },
+    { "path": "/terms", "title": "Terms & Conditions" },
+    { "path": "/account", "title": "Account" },
+    { "path": "/checkout", "title": "Checkout" },
+    { "path": "/cart", "title": "Cart" },
+    { "path": "/product/:slug", "title": "Product" }
+  ]
+}

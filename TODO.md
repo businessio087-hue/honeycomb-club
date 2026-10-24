@@ -10,3 +10,4 @@
 - [x] **Opening greeting and Wellness panel update** — On the landing page, reveal the Honeycomb Club logo in the middle, animate a cursive “Welcome” being written for five seconds, unwind it before handing off to the site, honor reduced-motion preferences, and use the supplied `healthTHS.jpg` image in the Wellness category panel.
 - [x] **Cosmetics panel image update** — Use the supplied `COSEMETICTHC.jpg` image in the Cosmetics category panel with the same dark botanical overlay and responsive crop treatment as the Wellness panel.
 - [x] **Smokeables panel image update** — Use the supplied `smokeableths.jpg` image in the Smokeables category panel with the same dark botanical overlay and responsive crop treatment as the Wellness and Cosmetics panels.
+- [x] **Shop dropdown refinement** — Remove the Shop button arrow and automatically close the category dropdown when another navigation item, header action, or outside area is tapped.

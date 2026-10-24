@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useRoute } from "wouter";
 import {
   ArrowRight,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Instagram,
@@ -106,6 +105,23 @@ function SiteHeader({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const shopMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const closeOnOutsideTap = (event: PointerEvent) => {
+      if (!shopMenuRef.current?.contains(event.target as Node)) {
+        setShopOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", closeOnOutsideTap);
+    return () => document.removeEventListener("pointerdown", closeOnOutsideTap);
+  }, []);
+
+  const closeNavigation = () => {
+    setMenuOpen(false);
+    setShopOpen(false);
+  };
+
   return (
     <header className="site-header">
       <div className="top-note">
@@ -118,23 +134,27 @@ function SiteHeader({
           <img src={logoUrl} alt="The Honeycomb Club" />
         </Link>
         <nav className={menuOpen ? "primary-nav open" : "primary-nav"}>
-          <Link href="/" onClick={() => setMenuOpen(false)}>
+          <Link href="/" onClick={closeNavigation}>
             Home
           </Link>
-          <div className="nav-dropdown">
-            <button onClick={() => setShopOpen(v => !v)} className="nav-link">
-              Shop <ChevronDown size={14} />
+          <div className="nav-dropdown" ref={shopMenuRef}>
+            <button
+              onClick={() => setShopOpen(v => !v)}
+              className="nav-link"
+              aria-expanded={shopOpen}
+            >
+              Shop
             </button>
             {shopOpen && (
               <div className="dropdown-menu glass">
-                <Link href="/shop" onClick={() => setMenuOpen(false)}>
+                <Link href="/shop" onClick={closeNavigation}>
                   All Products
                 </Link>
                 {categories.map(c => (
                   <Link
                     key={c.name}
                     href={`/shop?category=${c.name}`}
-                    onClick={() => setMenuOpen(false)}
+                    onClick={closeNavigation}
                   >
                     {c.name}
                   </Link>
@@ -142,30 +162,49 @@ function SiteHeader({
               </div>
             )}
           </div>
-          <Link href="/about" onClick={() => setMenuOpen(false)}>
+          <Link href="/about" onClick={closeNavigation}>
             About
           </Link>
-          <Link href="/contact" onClick={() => setMenuOpen(false)}>
+          <Link href="/contact" onClick={closeNavigation}>
             Contact
           </Link>
         </nav>
         <div className="header-actions">
-          <GlassIconButton label="Search" onClick={onSearch}>
+          <GlassIconButton
+            label="Search"
+            onClick={() => {
+              setShopOpen(false);
+              onSearch();
+            }}
+          >
             <Search size={18} strokeWidth={1.6} />
           </GlassIconButton>
-          <Link href="/account" className="desktop-only">
+          <Link
+            href="/account"
+            className="desktop-only"
+            onClick={closeNavigation}
+          >
             <GlassIconButton label="Account">
               <UserRound size={18} strokeWidth={1.6} />
             </GlassIconButton>
           </Link>
-          <button className="cart-pill" onClick={onCart}>
+          <button
+            className="cart-pill"
+            onClick={() => {
+              setShopOpen(false);
+              onCart();
+            }}
+          >
             <ShoppingBag size={17} strokeWidth={1.7} />
             <span>{cartCount}</span>
           </button>
           <button
             className="mobile-menu"
             aria-label="Menu"
-            onClick={() => setMenuOpen(v => !v)}
+            onClick={() => {
+              setShopOpen(false);
+              setMenuOpen(v => !v);
+            }}
           >
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>

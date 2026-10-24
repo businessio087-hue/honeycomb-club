@@ -2,7 +2,7 @@
 
 ## Product scope
 
-A polished responsive South African CBD retail storefront using the real Honeycomb Club content and catalog from the live site. The experience includes a home page, shop with category filters and search, product detail views, cart drawer, checkout flow, account prompt, contact page, about page, terms page, Yoco badge, 18+ age gate, compliance messaging, real product imagery, and the supplied Honeycombcollage.pdf as the visual reference.
+A polished responsive South African CBD retail storefront using the real Honeycomb Club content and catalog from the live site. The experience includes a home page, shop with category filters and search, product detail views, cart drawer, checkout flow, account prompt, contact page, about page, terms page, Yoco badge, 18+ age gate, compliance messaging, real product imagery, a sticky-note visitor comment board with an `/api/comments` REST endpoint, and the supplied Honeycombcollage.pdf as the visual reference.
 
 ## Design
 
@@ -68,9 +68,12 @@ Deep forest green `#1F3D2B`.
 - `client/src/pages/Storefront.tsx` — the responsive site shell, page sections, filters, cart, checkout, and modals.
 - `client/src/data/products.ts` — the real live-site product catalog, categories, prices, and imagery.
 - `client/src/index.css` — design tokens, glassmorphism surfaces, responsive layout, and motion rules.
+- `server/_core/index.ts` — health, OAuth, platform, and sanitized visitor comments REST endpoints.
 - `public/manus-routes.json` — declared page routes for the managed preview.
 - `app.config.ts` — platform project logo metadata.
 
 ## Implementation notes
 
 The current build uses local React state for the shopping flow, so the preview is immediately interactive without requiring payment credentials. Yoco is represented as the requested payment brand badge and checkout handoff affordance. Account remains a clear entry point to the platform-auth flow rather than a fake credential form.
+
+The comment board uses local React state for optimistic updates and loads/posts through `/api/comments`. The Preview/server implementation keeps up to 40 sanitized notes in memory, applies a honeypot and ten-second per-IP rate limit, and is intentionally easy to replace with a persistent REST, Firebase, or Supabase adapter later. Note colors and rotations are persisted in each API response; all board motion uses transform/opacity and collapses to a fade/instant placement under reduced motion.

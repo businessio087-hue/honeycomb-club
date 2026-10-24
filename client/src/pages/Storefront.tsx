@@ -446,6 +446,265 @@ function ComplianceBand() {
   );
 }
 
+type CommentColor = "yellow" | "pink" | "blue" | "green" | "orange";
+type VisitorComment = {
+  id: string;
+  name: string;
+  text: string;
+  color: CommentColor;
+  rotation: number;
+  createdAt: string;
+};
+
+const commentColors: CommentColor[] = [
+  "yellow",
+  "pink",
+  "blue",
+  "green",
+  "orange",
+];
+
+const starterComments: VisitorComment[] = [
+  {
+    id: "starter-1",
+    name: "The Club",
+    text: "A calmer way to browse. Love the little details.",
+    color: "yellow",
+    rotation: -2,
+    createdAt: "2026-10-18T10:00:00.000Z",
+  },
+  {
+    id: "starter-2",
+    name: "Nandi",
+    text: "The space feels considered from the first click.",
+    color: "pink",
+    rotation: 3,
+    createdAt: "2026-10-19T12:30:00.000Z",
+  },
+  {
+    id: "starter-3",
+    name: "M.",
+    text: "Soft light, good energy, and a very thoughtful collection.",
+    color: "blue",
+    rotation: -4,
+    createdAt: "2026-10-20T14:15:00.000Z",
+  },
+  {
+    id: "starter-4",
+    name: "Lebo",
+    text: "The Wellness panel is beautiful.",
+    color: "green",
+    rotation: 2,
+    createdAt: "2026-10-21T09:20:00.000Z",
+  },
+];
+
+function formatCommentDate(value: string) {
+  return new Intl.DateTimeFormat("en-ZA", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function CommentNote({
+  comment,
+  entering = false,
+}: {
+  comment: VisitorComment;
+  entering?: boolean;
+}) {
+  return (
+    <article
+      className={`comment-note note-${comment.color}${entering ? " note-entering" : ""}`}
+      style={
+        { "--note-rotation": `${comment.rotation}deg` } as React.CSSProperties
+      }
+    >
+      <span className="note-tape" aria-hidden="true" />
+      <p>{comment.text}</p>
+      <footer>
+        <strong>{comment.name}</strong>
+        <time dateTime={comment.createdAt}>
+          {formatCommentDate(comment.createdAt)}
+        </time>
+      </footer>
+    </article>
+  );
+}
+
+function CommentBoard() {
+  const [comments, setComments] = useState<VisitorComment[]>(starterComments);
+  const [text, setText] = useState("");
+  const [name, setName] = useState("");
+  const [color, setColor] = useState<CommentColor>("yellow");
+  const [sticking, setSticking] = useState(false);
+  const [enteringId, setEnteringId] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [website, setWebsite] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/comments")
+      .then(response => (response.ok ? response.json() : Promise.reject()))
+      .then((data: VisitorComment[]) => {
+        if (active && Array.isArray(data) && data.length) setComments(data);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmedText = text.trim();
+    const trimmedName = name.trim() || "Anonymous";
+    if (!trimmedText) {
+      setError("Write a note before sticking it to the board.");
+      return;
+    }
+    if (trimmedText.length > 200) {
+      setError("Keep your note to 200 characters or fewer.");
+      return;
+    }
+    if (website) return;
+
+    setError("");
+    setSticking(true);
+    const optimistic: VisitorComment = {
+      id: `optimistic-${Date.now()}`,
+      name: trimmedName.slice(0, 60),
+      text: trimmedText,
+      color,
+      rotation: Math.round((Math.random() * 12 - 6) * 10) / 10,
+      createdAt: new Date().toISOString(),
+    };
+    setComments(current => [optimistic, ...current].slice(0, 40));
+    setEnteringId(optimistic.id);
+    setText("");
+    setName("");
+
+    window.setTimeout(() => setSticking(false), 760);
+    window.setTimeout(() => setEnteringId(null), 1200);
+
+    try {
+      const response = await fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: optimistic.name,
+          text: optimistic.text,
+          color: optimistic.color,
+          rotation: optimistic.rotation,
+          website,
+        }),
+      });
+      if (!response.ok) throw new Error("Could not stick note");
+      const saved = (await response.json()) as VisitorComment;
+      setComments(current =>
+        current.map(item => (item.id === optimistic.id ? saved : item))
+      );
+    } catch {
+      setComments(current => current.filter(item => item.id !== optimistic.id));
+      setError("That note could not be stuck. Please try again.");
+    }
+  };
+
+  return (
+    <section className="comment-board-section">
+      <div className="container">
+        <div className="comment-board-heading">
+          <div>
+            <div className="section-kicker">03 / Leave a note</div>
+            <h2>
+              Say hello,
+              <br />
+              <em>stick around.</em>
+            </h2>
+          </div>
+          <p>Leave a little piece of your visit on the Club board.</p>
+        </div>
+        <div className="comment-board-layout">
+          <form
+            className={`comment-input-note note-${color}${sticking ? " is-sticking" : ""}`}
+            onSubmit={submit}
+          >
+            <span className="note-tape" aria-hidden="true" />
+            <label htmlFor="comment-text">Your note</label>
+            <textarea
+              id="comment-text"
+              value={text}
+              maxLength={200}
+              onChange={event => setText(event.target.value)}
+              placeholder="Write something kind…"
+              rows={5}
+              required
+            />
+            <div className="comment-note-meta">
+              <label htmlFor="comment-name">Your name</label>
+              <input
+                id="comment-name"
+                value={name}
+                maxLength={60}
+                onChange={event => setName(event.target.value)}
+                placeholder="Anonymous"
+              />
+              <span>{text.length}/200</span>
+            </div>
+            <div
+              className="comment-color-picker"
+              aria-label="Choose a note color"
+            >
+              {commentColors.map(option => (
+                <button
+                  key={option}
+                  type="button"
+                  className={`color-swatch swatch-${option}${color === option ? " selected" : ""}`}
+                  aria-label={`${option} note`}
+                  aria-pressed={color === option}
+                  onClick={() => setColor(option)}
+                />
+              ))}
+            </div>
+            <button className="stick-button" type="submit" disabled={sticking}>
+              {sticking ? "Sticking…" : "Stick it!"}
+            </button>
+            <input
+              className="comment-honeypot"
+              tabIndex={-1}
+              autoComplete="off"
+              value={website}
+              onChange={event => setWebsite(event.target.value)}
+              aria-hidden="true"
+            />
+            {error && (
+              <p className="comment-error" role="alert">
+                {error}
+              </p>
+            )}
+          </form>
+          <div className="comment-board" aria-label="Visitor comment board">
+            <div className="comment-board-topline">
+              <span>From the Club community</span>
+              <span>{comments.length} notes</span>
+            </div>
+            <div className="comment-board-scroll">
+              {comments.map(comment => (
+                <CommentNote
+                  key={comment.id}
+                  comment={comment}
+                  entering={comment.id === enteringId}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
   const featured = products.slice(5, 9);
   return (
@@ -545,27 +804,7 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
             </div>
           </div>
         </section>
-        <section className="feature-strip">
-          <div
-            className="strip-image"
-            style={{ backgroundImage: `url(${heroImage})` }}
-          />
-          <div className="strip-glass glass">
-            <span className="eyebrow">A considered collection</span>
-            <h2>
-              Soft light.
-              <br />
-              <em>Strong point of view.</em>
-            </h2>
-            <p>
-              Discover wellness, cosmetics, smokeables and edibles from the
-              original South African CBD club.
-            </p>
-            <Link className="button button-dark" href="/shop">
-              Browse all products <ArrowRight size={16} />
-            </Link>
-          </div>
-        </section>
+        <CommentBoard />
         <section className="featured-section container">
           <div className="section-heading">
             <div>

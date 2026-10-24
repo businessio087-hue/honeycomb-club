@@ -29,6 +29,8 @@ const foliageImage = "/assets/foliage.jpg";
 const logoUrl = "/assets/logo.png";
 const yocoUrl = "/assets/yoco.png";
 const wellnessImage = "/assets/healthTHS.jpg";
+const cosmeticsImage = "/assets/COSEMETICTHC.jpg";
+const smokeablesImage = "/assets/smokeableths.jpg";
 
 function useStoredAgeGate() {
   const [verified, setVerified] = useState(
@@ -481,13 +483,13 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
             <div className="category-grid">
               {categories.map((category, index) => (
                 <Link
-                  className={`category-card cat-${index + 1}${index === 0 ? " has-image" : ""}`}
+                  className={`category-card cat-${index + 1}${index < 3 ? " has-image" : ""}`}
                   key={category.name}
                   href={`/shop?category=${category.name}`}
                   style={
-                    index === 0
+                    index < 3
                       ? {
-                          backgroundImage: `linear-gradient(180deg, rgba(14, 26, 20, 0.16), rgba(14, 26, 20, 0.72)), url(${wellnessImage})`,
+                          backgroundImage: `linear-gradient(180deg, rgba(14, 26, 20, 0.16), rgba(14, 26, 20, 0.72)), url(${index === 0 ? wellnessImage : index === 1 ? cosmeticsImage : smokeablesImage})`,
                         }
                       : undefined
                   }

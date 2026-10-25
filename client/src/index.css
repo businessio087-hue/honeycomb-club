@@ -1694,6 +1694,16 @@ h2 {
   border-radius: 50%;
   font-size: 9px;
   color: var(--forest);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 180ms var(--ease-out);
+}
+.socials a:hover,
+.socials a:focus-visible {
+  color: white;
+  background: var(--forest);
+  transform: translateY(-2px);
 }
 .footer-bottom {
   border-top: 1px solid var(--line);

@@ -4,8 +4,10 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  Facebook,
   Instagram,
   MapPin,
+  MessageCircle,
   Menu,
   Search,
   ShoppingBag,
@@ -1374,11 +1376,30 @@ function Footer() {
         <div>
           <span className="eyebrow">Follow</span>
           <div className="socials">
-            <a href="https://www.instagram.com/thehoneycombclubza/">
-              <Instagram size={17} />
+            <a
+              href="https://www.instagram.com/thehoneycombclubza/"
+              aria-label="Follow The Honeycomb Club on Instagram"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Instagram size={15} strokeWidth={1.8} aria-hidden="true" />
             </a>
-            <a href="https://wa.me/+27673418785">WA</a>
-            <a href="http://fb.com/theHoneycombClubZA">FB</a>
+            <a
+              href="https://wa.me/27673418785"
+              aria-label="Contact The Honeycomb Club on WhatsApp"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MessageCircle size={15} strokeWidth={1.8} aria-hidden="true" />
+            </a>
+            <a
+              href="https://www.facebook.com/theHoneycombClubZA"
+              aria-label="Follow The Honeycomb Club on Facebook"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Facebook size={15} strokeWidth={1.8} aria-hidden="true" />
+            </a>
           </div>
         </div>
       </div>

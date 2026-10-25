@@ -16,6 +16,7 @@
   --line: rgba(31, 61, 43, 0.16);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-bounce: cubic-bezier(0.22, 1.28, 0.36, 1);
   --radius-lg: 24px;
   --radius-md: 16px;
   --note-yellow: #f7e58d;
@@ -40,6 +41,29 @@ body {
   font-family: "Avenir", "Avenir Next", "Nunito Sans", "Montserrat", sans-serif;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
+}
+
+@keyframes babble-up {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.94);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+.scroll-babble[data-babble-ready="true"] .babble-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(50px) scale(0.94);
+  filter: blur(8px);
+  will-change: transform, opacity, filter;
+}
+.scroll-babble[data-babble-ready="true"].is-visible .babble-word {
+  animation: babble-up 720ms var(--ease-bounce) var(--babble-delay) both;
 }
 button,
 input,
@@ -1992,6 +2016,11 @@ h2 {
   .greeting-subline,
   .greeting-fineprint {
     animation: none !important;
+  }
+  .scroll-babble[data-babble-ready="true"] .babble-word {
+    opacity: 1;
+    transform: none;
+    filter: none;
   }
   .greeting-logo,
   .greeting-subline,

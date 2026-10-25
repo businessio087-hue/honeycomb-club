@@ -34,69 +34,6 @@ const cosmeticsImage = "/assets/COSEMETICTHC.jpg";
 const smokeablesImage = "/assets/smokeableths.jpg";
 const ediblesImage = "/assets/ediblesTHC.jpg";
 
-function prepareBabbleHeading(heading: HTMLElement) {
-  if (heading.dataset.babbleReady === "true") return;
-
-  heading.classList.add("scroll-babble");
-
-  const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
-  const textNodes: Text[] = [];
-  let currentNode = walker.nextNode();
-  while (currentNode) {
-    if (currentNode.textContent?.trim()) textNodes.push(currentNode as Text);
-    currentNode = walker.nextNode();
-  }
-
-  let wordIndex = 0;
-  textNodes.forEach(textNode => {
-    const fragment = document.createDocumentFragment();
-    textNode.textContent?.split(/(\s+)/).forEach(part => {
-      if (!part) return;
-      if (/\s+/.test(part)) {
-        fragment.appendChild(document.createTextNode(part));
-        return;
-      }
-      const word = document.createElement("span");
-      word.className = "babble-word";
-      word.textContent = part;
-      word.style.setProperty("--babble-delay", `${wordIndex * 0.05}s`);
-      wordIndex += 1;
-      fragment.appendChild(word);
-    });
-    textNode.parentNode?.replaceChild(fragment, textNode);
-  });
-
-  heading.dataset.babbleReady = "true";
-}
-
-function useScrollBabble(location: string) {
-  useEffect(() => {
-    const headings = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        "main h1, main h2, main h3, .site-footer h3"
-      )
-    );
-    headings.forEach(prepareBabbleHeading);
-
-    if (!("IntersectionObserver" in window)) {
-      headings.forEach(heading => heading.classList.add("is-visible"));
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          entry.target.classList.toggle("is-visible", entry.isIntersecting);
-        });
-      },
-      { threshold: 0.2, rootMargin: "0px 0px -8% 0px" }
-    );
-    headings.forEach(heading => observer.observe(heading));
-
-    return () => observer.disconnect();
-  }, [location]);
-}
-
 function useStoredAgeGate() {
   const [verified, setVerified] = useState(
     () => window.localStorage.getItem("thc-age-verified") === "yes"
@@ -1554,7 +1491,6 @@ export default function Storefront() {
     }
   });
   const age = useStoredAgeGate();
-  useScrollBabble(location);
   useEffect(() => {
     window.localStorage.setItem("thc-cart", JSON.stringify(lines));
   }, [lines]);

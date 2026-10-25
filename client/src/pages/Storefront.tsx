@@ -466,6 +466,43 @@ const commentColors: CommentColor[] = [
   "green",
   "orange",
 ];
+const blockedCommentTerms = [
+  "asshole",
+  "bastard",
+  "bitch",
+  "bullshit",
+  "cock",
+  "crap",
+  "cunt",
+  "dick",
+  "faggot",
+  "fuck",
+  "motherfucker",
+  "nigga",
+  "nigger",
+  "piss",
+  "pussy",
+  "shit",
+  "slut",
+  "whore",
+];
+const blockedCommentPattern = new RegExp(
+  `\\b(?:${blockedCommentTerms.join("|")})\\b`,
+  "i"
+);
+
+function containsBlockedCommentLanguage(value: string) {
+  return blockedCommentPattern.test(
+    value
+      .toLowerCase()
+      .replace(/0/g, "o")
+      .replace(/1/g, "i")
+      .replace(/3/g, "e")
+      .replace(/4/g, "a")
+      .replace(/5/g, "s")
+      .replace(/7/g, "t")
+  );
+}
 
 const starterComments: VisitorComment[] = [
   {
@@ -571,6 +608,10 @@ function CommentBoard() {
       setError("Keep your note to 200 characters or fewer.");
       return;
     }
+    if (containsBlockedCommentLanguage(`${trimmedName} ${trimmedText}`)) {
+      setError("Please keep Club Board notes respectful.");
+      return;
+    }
     if (website) return;
 
     setError("");
@@ -603,14 +644,23 @@ function CommentBoard() {
           website,
         }),
       });
-      if (!response.ok) throw new Error("Could not stick note");
+      if (!response.ok) {
+        const failure = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(failure?.error || "Could not stick note");
+      }
       const saved = (await response.json()) as VisitorComment;
       setComments(current =>
         current.map(item => (item.id === optimistic.id ? saved : item))
       );
-    } catch {
+    } catch (submissionError) {
       setComments(current => current.filter(item => item.id !== optimistic.id));
-      setError("That note could not be stuck. Please try again.");
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "That note could not be stuck. Please try again."
+      );
     }
   };
 
@@ -670,6 +720,9 @@ function CommentBoard() {
                 />
               ))}
             </div>
+            <p className="comment-guidance">
+              Keep it kind — offensive language will be blocked.
+            </p>
             <button className="stick-button" type="submit" disabled={sticking}>
               {sticking ? "Sticking…" : "Stick it!"}
             </button>
@@ -844,10 +897,18 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
                 Read our story <ArrowRight size={16} />
               </Link>
             </div>
-            <div
-              className="about-photo"
-              style={{ backgroundImage: `url(${heroImage})` }}
-            >
+            <div className="about-photo">
+              <video
+                className="about-video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="Close-up edible moment from The Honeycomb Club"
+              >
+                <source src="/assets/about-club.mp4" type="video/mp4" />
+              </video>
               <span>
                 Over 7 years
                 <br />

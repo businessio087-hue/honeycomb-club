@@ -28,6 +28,30 @@ const commentColors = new Set<CommentColor>([
 ]);
 const comments: VisitorComment[] = [];
 const recentCommentPosts = new Map<string, number>();
+const blockedCommentTerms = [
+  "asshole",
+  "bastard",
+  "bitch",
+  "bullshit",
+  "cock",
+  "crap",
+  "cunt",
+  "dick",
+  "faggot",
+  "fuck",
+  "motherfucker",
+  "nigga",
+  "nigger",
+  "piss",
+  "pussy",
+  "shit",
+  "slut",
+  "whore",
+];
+const blockedCommentPattern = new RegExp(
+  `\\b(?:${blockedCommentTerms.join("|")})\\b`,
+  "i"
+);
 
 const cleanCommentText = (value: unknown, maxLength: number) =>
   String(value ?? "")
@@ -35,6 +59,18 @@ const cleanCommentText = (value: unknown, maxLength: number) =>
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, maxLength);
+
+const containsBlockedCommentLanguage = (value: string) =>
+  blockedCommentPattern.test(
+    value
+      .toLowerCase()
+      .replace(/0/g, "o")
+      .replace(/1/g, "i")
+      .replace(/3/g, "e")
+      .replace(/4/g, "a")
+      .replace(/5/g, "s")
+      .replace(/7/g, "t")
+  );
 
 async function startServer() {
   const app = express();
@@ -65,6 +101,10 @@ async function startServer() {
     const rotation = Math.max(-6, Math.min(6, Number(req.body?.rotation) || 0));
     if (!text)
       return res.status(400).json({ error: "Comment text is required." });
+    if (containsBlockedCommentLanguage(`${name} ${text}`))
+      return res
+        .status(400)
+        .json({ error: "Please keep Club Board notes respectful." });
 
     const comment: VisitorComment = {
       id: randomUUID(),

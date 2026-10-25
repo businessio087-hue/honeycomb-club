@@ -44,7 +44,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
   app.get("/api/comments", (_req, res) => {
-    res.json(comments.slice(0, 40));
+    res.json(comments.slice(0, 30));
   });
   app.post("/api/comments", (req, res) => {
     const ip = req.ip || "unknown";
@@ -75,7 +75,7 @@ async function startServer() {
       createdAt: new Date().toISOString(),
     };
     comments.unshift(comment);
-    comments.splice(40);
+    comments.splice(30);
     recentCommentPosts.set(ip, Date.now());
     return res.status(201).json(comment);
   });

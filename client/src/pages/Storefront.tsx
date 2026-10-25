@@ -580,7 +580,7 @@ function CommentBoard() {
       rotation: Math.round((Math.random() * 12 - 6) * 10) / 10,
       createdAt: new Date().toISOString(),
     };
-    setComments(current => [optimistic, ...current].slice(0, 40));
+    setComments(current => [optimistic, ...current].slice(0, 30));
     setEnteringId(optimistic.id);
     setText("");
     setName("");

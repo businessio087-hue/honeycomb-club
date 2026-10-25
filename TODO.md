@@ -16,3 +16,4 @@
 - [x] **Edibles panel image update** — Use the supplied `ediblesTHC.jpg` image in the Edibles category panel with the same dark botanical overlay and responsive crop treatment as the other category panels.
 - [x] **Footer social icons** — Replace the Follow text abbreviations with Instagram, WhatsApp, and Facebook icons using the existing brand links, accessible labels, external-link security attributes, and visible hover/focus states.
 - [x] **About video and Club Board moderation** — Replace the About Us panel background image with the supplied MP4 as a muted, inline, autoplaying, looping video, and block vulgar or offensive Club Board language in both the browser and `/api/comments` server endpoint with a respectful error message.
+- [x] **Explore panel labels** — Remove the numeric labels from all Explore category panels while preserving their names, imagery, descriptions, links, and arrow actions.

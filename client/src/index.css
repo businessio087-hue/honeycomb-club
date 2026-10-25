@@ -684,11 +684,6 @@ h2 {
   opacity: 0.72;
   margin: 0;
 }
-.category-number {
-  font-size: 11px;
-  opacity: 0.52;
-  letter-spacing: 0.1em;
-}
 .category-card > svg {
   align-self: end;
 }

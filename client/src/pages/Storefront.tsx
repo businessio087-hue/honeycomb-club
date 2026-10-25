@@ -848,7 +848,6 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
                       : undefined
                   }
                 >
-                  <div className="category-number">0{index + 1}</div>
                   <div>
                     <span className="eyebrow">{category.eyebrow}</span>
                     <h3>{category.name}</h3>

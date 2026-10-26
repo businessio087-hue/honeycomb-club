@@ -686,7 +686,7 @@ function CommentBoard() {
       <div className="container">
         <div className="comment-board-heading">
           <div>
-            <div className="section-kicker">03 / Leave a note</div>
+            <div className="section-kicker">Leave a note</div>
             <h2>
               Say hello,
               <br />
@@ -814,7 +814,7 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
           </div>
         </section>
         <section className="intro-section container">
-          <div className="section-kicker">01 / The Club</div>
+          <div className="section-kicker">The Club</div>
           <div className="intro-grid">
             <h2>
               A calmer way
@@ -842,7 +842,7 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
           <div className="container">
             <div className="section-heading">
               <div>
-                <div className="section-kicker">02 / Explore</div>
+                <div className="section-kicker">Explore</div>
                 <h2>
                   Made for the
                   <br />
@@ -880,7 +880,7 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
         <section className="featured-section container">
           <div className="section-heading">
             <div>
-              <div className="section-kicker">03 / Selected</div>
+              <div className="section-kicker">Selected</div>
               <h2>
                 Trending
                 <br />
@@ -900,7 +900,7 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
         <section className="about-teaser">
           <div className="container about-teaser-inner">
             <div className="glass about-card">
-              <div className="section-kicker">04 / About us</div>
+              <div className="section-kicker">About us</div>
               <h2>
                 Cannabis, with a little more <em>care.</em>
               </h2>
@@ -935,7 +935,7 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
         </section>
         <section className="visit-section container">
           <div className="visit-copy">
-            <div className="section-kicker">05 / Visit us</div>
+            <div className="section-kicker">Visit us</div>
             <h2>
               Come by for a<br />
               <em>closer look.</em>

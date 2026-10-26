@@ -218,6 +218,8 @@ function SiteHeader({
 }
 
 function AgeGate({ onConfirm }: { onConfirm: () => void }) {
+  const [accepted, setAccepted] = useState(false);
+
   return (
     <div className="age-overlay">
       <div className="age-backdrop" />
@@ -229,16 +231,31 @@ function AgeGate({ onConfirm }: { onConfirm: () => void }) {
       >
         <div className="age-mark">THC</div>
         <p className="eyebrow">The Honeycomb Club</p>
-        <h1 id="age-gate-title">Before you enter, take a breath.</h1>
+        <h1 id="age-gate-title">Are you 18 or older?</h1>
         <p>
           This is an adult-only cannabis retail experience. Our products are
           CBD-focused, non-psychoactive, and contain less than 0.001% THC.
         </p>
-        <button className="button button-dark" onClick={onConfirm}>
-          I am 18 or older <ArrowRight size={16} />
+        <label className="age-consent">
+          <input
+            type="checkbox"
+            checked={accepted}
+            onChange={event => setAccepted(event.target.checked)}
+          />
+          <span>
+            I confirm that I am 18 or older and accept the{" "}
+            <Link href="/terms">Terms & Conditions</Link>.
+          </span>
+        </label>
+        <button
+          className="button button-dark"
+          onClick={onConfirm}
+          disabled={!accepted}
+        >
+          Enter the Club <ArrowRight size={16} />
         </button>
         <span className="age-fineprint">
-          By entering, you confirm that you are of legal age in your country.
+          You must be 18 or older to enter this adult-only site.
         </span>
       </div>
     </div>
@@ -1612,7 +1629,7 @@ export default function Storefront() {
         />
       )}
       {search && <SearchModal onClose={() => setSearch(false)} />}
-      {!age.verified && <AgeGate onConfirm={age.confirm} />}
+      {greetingDone && !age.verified && <AgeGate onConfirm={age.confirm} />}
     </div>
   );
 }

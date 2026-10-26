@@ -1788,6 +1788,32 @@ h2 {
   line-height: 1.7;
   margin-bottom: 26px;
 }
+.age-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.age-consent input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  accent-color: var(--forest);
+}
+.age-consent a {
+  color: var(--forest);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.age-card .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
 .age-fineprint {
   display: block;
   font-size: 9px;

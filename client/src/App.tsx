@@ -1,10 +1,25 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
+import { useEffect } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { scrollToTop } from "./lib/scrollToTop";
 import Storefront from "./pages/Storefront";
 import NotFound from "./pages/NotFound";
+
+function ScrollToTop() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    window.history.scrollRestoration = "manual";
+    scrollToTop();
+  }, [location]);
+
+  return null;
+}
 
 function App() {
   return (
@@ -12,6 +27,7 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
+          <ScrollToTop />
           <Switch>
             <Route path="/" component={Storefront} />
             <Route path="/shop" component={Storefront} />

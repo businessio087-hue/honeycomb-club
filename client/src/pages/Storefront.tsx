@@ -229,7 +229,11 @@ function AgeGate({ onConfirm }: { onConfirm: () => void }) {
         aria-modal="true"
         aria-labelledby="age-gate-title"
       >
-        <div className="age-mark">THC</div>
+        <img
+          src={logoUrl}
+          alt="The Honeycomb Club"
+          className="age-logo"
+        />
         <p className="eyebrow">The Honeycomb Club</p>
         <h1 id="age-gate-title">Are you 18 or older?</h1>
         <p>

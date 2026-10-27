@@ -2110,13 +2110,26 @@ h2 {
     min-height: 500px;
     padding: 38px 26px;
   }
+  .hero-glass-panel .eyebrow {
+    margin-bottom: 18px;
+  }
   .hero-glass-panel h1 {
-    font-size: 76px;
+    font-size: clamp(44px, 15vw, 76px);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  .hero-glass-panel p {
+    max-width: 100%;
+    margin-bottom: 26px;
   }
   .hero-meta {
     display: grid;
     gap: 8px;
-    margin-top: 34px;
+    margin-top: 32px;
+    padding-top: 14px;
   }
   .hero-caption {
     right: -8px;

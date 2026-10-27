@@ -25,14 +25,15 @@ import {
 
 type CartLine = { product: Product; quantity: number };
 
-const heroImage = "/assets/hero-store.jpeg";
-const foliageImage = "/assets/foliage.jpg";
-const logoUrl = "/assets/logo.png";
-const yocoUrl = "/assets/yoco.png";
-const wellnessImage = "/assets/healthTHS.jpg";
-const cosmeticsImage = "/assets/COSEMETICTHC.jpg";
-const smokeablesImage = "/assets/smokeableths.jpg";
-const ediblesImage = "/assets/ediblesTHC.jpg";
+const publicAsset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const heroImage = publicAsset("assets/hero-store.jpeg");
+const foliageImage = publicAsset("assets/foliage.jpg");
+const logoUrl = publicAsset("assets/logo.png");
+const yocoUrl = publicAsset("assets/yoco.png");
+const wellnessImage = publicAsset("assets/healthTHS.jpg");
+const cosmeticsImage = publicAsset("assets/COSEMETICTHC.jpg");
+const smokeablesImage = publicAsset("assets/smokeableths.jpg");
+const ediblesImage = publicAsset("assets/ediblesTHC.jpg");
 
 function useStoredAgeGate() {
   const [verified, setVerified] = useState(
@@ -927,7 +928,7 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
                 preload="metadata"
                 aria-label="Close-up edible moment from The Honeycomb Club"
               >
-                <source src="/assets/about-club.mp4" type="video/mp4" />
+                <source src={publicAsset("assets/about-club.mp4")} type="video/mp4" />
               </video>
               <span>
                 Over 7 years
@@ -1499,7 +1500,8 @@ export default function Storefront() {
   const [location, navigate] = useLocation();
   const [matchProduct, params] = useRoute("/product/:slug");
   const [greetingDone, setGreetingDone] = useState(() => {
-    if (window.location.pathname !== "/") return true;
+    const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+    if (window.location.pathname.replace(/\/$/, "") !== basePath) return true;
     return window.sessionStorage.getItem("thc-greeting-seen") === "yes";
   });
   const [drawer, setDrawer] = useState(false);

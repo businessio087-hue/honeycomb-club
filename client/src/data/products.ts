@@ -49,7 +49,10 @@ const assetByPath: Record<string, string> = {
     "/assets/products/19-water-soluble-300x300.jpeg",
 };
 
-const img = (path: string) => assetByPath[path] ?? path;
+const img = (path: string) => {
+  const assetPath = assetByPath[path] ?? path;
+  return `${import.meta.env.BASE_URL}${assetPath.replace(/^\//, "")}`;
+};
 
 export const products: Product[] = [
   {

@@ -28,7 +28,14 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
-          <Router hook={import.meta.env.BASE_URL === "/" ? undefined : useHashLocation}>
+          <Router
+            hook={
+              import.meta.env.MODE === "static" ||
+              import.meta.env.BASE_URL !== "/"
+                ? useHashLocation
+                : undefined
+            }
+          >
             <ScrollToTop />
             <Switch>
               <Route path="/" component={Storefront} />

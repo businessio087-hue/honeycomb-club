@@ -25,6 +25,8 @@ import {
 
 type CartLine = { product: Product; quantity: number };
 
+const isStaticSite = import.meta.env.MODE === "static";
+const staticCommentsKey = "thc-static-comments";
 const publicAsset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 const heroImage = publicAsset("assets/hero-store.jpeg");
 const foliageImage = publicAsset("assets/foliage.jpg");
@@ -230,11 +232,7 @@ function AgeGate({ onConfirm }: { onConfirm: () => void }) {
         aria-modal="true"
         aria-labelledby="age-gate-title"
       >
-        <img
-          src={logoUrl}
-          alt="The Honeycomb Club"
-          className="age-logo"
-        />
+        <img src={logoUrl} alt="The Honeycomb Club" className="age-logo" />
         <p className="eyebrow">The Honeycomb Club</p>
         <h1 id="age-gate-title">Are you 18 or older?</h1>
         <p>
@@ -596,7 +594,16 @@ function CommentNote({
 }
 
 function CommentBoard() {
-  const [comments, setComments] = useState<VisitorComment[]>(starterComments);
+  const [comments, setComments] = useState<VisitorComment[]>(() => {
+    if (!isStaticSite) return starterComments;
+    try {
+      const saved = window.localStorage.getItem(staticCommentsKey);
+      return saved ? (JSON.parse(saved) as VisitorComment[]) : starterComments;
+    } catch (error) {
+      console.error("Could not load saved Club Board notes.", error);
+      return starterComments;
+    }
+  });
   const [text, setText] = useState("");
   const [name, setName] = useState("");
   const [color, setColor] = useState<CommentColor>("yellow");
@@ -606,6 +613,7 @@ function CommentBoard() {
   const [website, setWebsite] = useState("");
 
   useEffect(() => {
+    if (isStaticSite) return;
     let active = true;
     fetch("/api/comments")
       .then(response => (response.ok ? response.json() : Promise.reject()))
@@ -646,13 +654,33 @@ function CommentBoard() {
       rotation: Math.round((Math.random() * 12 - 6) * 10) / 10,
       createdAt: new Date().toISOString(),
     };
-    setComments(current => [optimistic, ...current].slice(0, 30));
+    const updatedComments = [optimistic, ...comments].slice(0, 30);
+
+    if (isStaticSite) {
+      try {
+        window.localStorage.setItem(
+          staticCommentsKey,
+          JSON.stringify(updatedComments)
+        );
+      } catch (storageError) {
+        setError(
+          "Your browser could not save this note. Check available storage and try again."
+        );
+        setSticking(false);
+        console.error("Could not save a Club Board note.", storageError);
+        return;
+      }
+    }
+
+    setComments(updatedComments);
     setEnteringId(optimistic.id);
     setText("");
     setName("");
 
     window.setTimeout(() => setSticking(false), 760);
     window.setTimeout(() => setEnteringId(null), 1200);
+
+    if (isStaticSite) return;
 
     try {
       const response = await fetch("/api/comments", {
@@ -745,6 +773,11 @@ function CommentBoard() {
             <p className="comment-guidance">
               Keep it kind — offensive language will be blocked.
             </p>
+            {isStaticSite && (
+              <p className="comment-guidance">
+                Notes are saved only in this browser on this device.
+              </p>
+            )}
             <button className="stick-button" type="submit" disabled={sticking}>
               {sticking ? "Sticking…" : "Stick it!"}
             </button>
@@ -928,7 +961,10 @@ function HomePage({ onAdd }: { onAdd: (p: Product) => void }) {
                 preload="metadata"
                 aria-label="Close-up edible moment from The Honeycomb Club"
               >
-                <source src={publicAsset("assets/about-club.mp4")} type="video/mp4" />
+                <source
+                  src={publicAsset("assets/about-club.mp4")}
+                  type="video/mp4"
+                />
               </video>
               <span>
                 Over 7 years
@@ -1500,7 +1536,10 @@ export default function Storefront() {
   const [location, navigate] = useLocation();
   const [matchProduct, params] = useRoute("/product/:slug");
   const [greetingDone, setGreetingDone] = useState(() => {
-    const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+    const basePath = new URL(
+      import.meta.env.BASE_URL,
+      window.location.href
+    ).pathname.replace(/\/$/, "");
     if (window.location.pathname.replace(/\/$/, "") !== basePath) return true;
     return window.sessionStorage.getItem("thc-greeting-seen") === "yes";
   });
@@ -1603,9 +1642,16 @@ export default function Storefront() {
           <p className="lede">
             Sign in to view your orders and keep your favourites close.
           </p>
-          <a className="button button-dark" href="/api/oauth/login">
-            Continue to account <ArrowRight size={16} />
-          </a>
+          {isStaticSite ? (
+            <p className="muted">
+              Account sign-in requires the Club application server and is not
+              available on this static site.
+            </p>
+          ) : (
+            <a className="button button-dark" href="/api/oauth/login">
+              Continue to account <ArrowRight size={16} />
+            </a>
+          )}
         </div>
       </main>
     ) : (

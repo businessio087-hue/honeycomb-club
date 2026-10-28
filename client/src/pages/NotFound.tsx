@@ -19,7 +19,10 @@ export default function NotFound() {
     document.head.appendChild(robots);
 
     // Full-page navigation: a client-side route change sends no request, so no 404 status.
-    if (window.location.pathname.replace(/\/$/, "") !== NOT_FOUND_PATH) {
+    if (
+      import.meta.env.MODE !== "static" &&
+      window.location.pathname.replace(/\/$/, "") !== NOT_FOUND_PATH
+    ) {
       window.location.replace(NOT_FOUND_PATH);
     }
 

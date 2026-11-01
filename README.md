@@ -5,6 +5,8 @@ React / Express / tRPC / Drizzle starter, adapted from the Sandbox web-db-user t
 - `pnpm dev`: development server; honors `PORT` (default 3000).
 - `pnpm build` / `pnpm start`: build and serve `dist/index.js` and `dist/public/`.
 - `pnpm build:static`: build a static site in `dist/public/`. Upload the contents of that directory to a static host; static mode uses hash-based routes so deep links do not require host rewrite rules.
+- Static hosts such as GoDaddy plans without a Node.js runtime can serve the static build only. API routes, account sign-in, and live backend features require a Node.js host; set its build command to `pnpm install --frozen-lockfile && pnpm build` and start command to `pnpm start`.
+- Copy `.env.example` to `.env` for local development. Set production values in the hosting platform's secret/environment-variable settings, not in source control. `DATABASE_URL`, `MANUS_JWT_SECRET`, and `MANUS_API_KEY` must remain server-side.
 - Static mode stores Club Board notes in the current browser only. Account sign-in and live backend features require deploying the application server; the preview checkout does not process payments.
 - `pnpm db:migrate`: apply checked-in migrations. `pnpm db:push`: generate and apply new schema changes.
 - `pnpm check` / `pnpm test`: types and application tests.
